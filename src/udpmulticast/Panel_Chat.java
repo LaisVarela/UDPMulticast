@@ -5,8 +5,6 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
-import java.net.NetworkInterface;
-import java.net.UnknownHostException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.LinkedList;
@@ -25,6 +23,7 @@ public class Panel_Chat extends javax.swing.JPanel {
     // aula de 27/04 - vector (list para threads)
     LinkedList<Client> list = new LinkedList<>();
     Client client = new Client();
+    
 
     // dois construtores são necessários devido a sobrecarga necessária
     public Panel_Chat() throws IOException {
@@ -143,6 +142,7 @@ public class Panel_Chat extends javax.swing.JPanel {
                 txA_type.setText(null);
             }
         }
+        System.out.println(clientSock.getLocalSocketAddress());
     }//GEN-LAST:event_bt_sendMouseClicked
 
     private void bt_backMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_backMouseClicked
@@ -158,13 +158,15 @@ public class Panel_Chat extends javax.swing.JPanel {
         int index = lst_users.getSelectedIndex();
         lstUsers.remove(index);
         Panel_JoinGroup.clientList.remove(index);
-        NetworkInterface networkInterface = null;
-        UDPMulticast.netInterface(networkInterface);
-
+        
         try {
-            clientSock.leaveGroup(new InetSocketAddress(InetAddress.getByName(UDPMulticast.multicastAddr), 50000), networkInterface);
+            System.out.println(clientSock.getNetworkInterface());
+            InetAddress multicastAddr = InetAddress.getByName("224.0.0.2");;
+            InetSocketAddress sockAddr = new InetSocketAddress(multicastAddr, 50000);
+            clientSock.leaveGroup(sockAddr, clientSock.getNetworkInterface());
             clientSock.close();
-        }  catch (IOException ex) {
+        } catch (IOException ex) {
+            System.out.println("Problema em sair do grupo");
             Logger.getLogger(Panel_Chat.class.getName()).log(Level.SEVERE, null, ex);
         }
 

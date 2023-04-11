@@ -1,28 +1,29 @@
 package udpmulticast;
 
 import java.io.IOException;
-import java.lang.System.Logger;
-import java.lang.System.Logger.Level;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Enumeration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import org.json.simple.JSONObject;
 import static udpmulticast.Panel_JoinGroup.clientList;
 
 public class UDPMulticast {
 
-    static String multicastAddr = "224.0.0.2";
     static JSONObject jObj = new JSONObject();
 
-    static public NetworkInterface netInterface(NetworkInterface netIF) {
+    static public NetworkInterface netInterface() {
+        NetworkInterface netIF = null;
         Enumeration<NetworkInterface> enumNetIF = null;
         try {
             enumNetIF = NetworkInterface.getNetworkInterfaces();
@@ -46,16 +47,27 @@ public class UDPMulticast {
         Window window = new Window();
         window.setVisible(true);
         window.setLocationRelativeTo(null);
-        NetworkInterface netIF = null;
-        netIF = netInterface(netIF);
         
+        /*if (args.length != 1) {
+            System.err.println("Invalid arguments...\n\tUses: UDPClient <server_IP> <server_port>");
+            System.exit(1);
+        } else {
+            try {
+                // pega o primeiro argumento com o IP do servidor
+                multicastAddr = InetAddress.getByName(args[0]);
+                // pega o segundo argumento com a porta do servidor
+                
+            } catch (UnknownHostException ex) {
+                Logger.getLogger(UDPMulticast.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }
+        System.out.println("Starting UPDClient with " + multicastAddr + ":");*/
         try {
-            //endereço IPv4 da minha máquina
-
-            InetAddress multicastGroup = InetAddress.getByName(multicastAddr);
+            InetAddress multicastAddr = InetAddress.getByName("224.0.0.2");
+            InetSocketAddress sockAddr = new InetSocketAddress(multicastAddr, 50000);
             MulticastSocket multicastSock = new MulticastSocket(50000);
-            multicastSock.joinGroup(new InetSocketAddress(multicastGroup, 50000), netIF);
-
+            multicastSock.joinGroup(sockAddr, netInterface());
             Panel_Chat receive = new Panel_Chat(multicastSock);
             receive.t1.start();
 
@@ -92,7 +104,7 @@ public class UDPMulticast {
                         if (jObj.get("msg") != null || !jObj.get("msg").equals("")) {
                             // uma segunda verificação se a mensagem é diferente de nula, para só então mandar o pacote
                             txData = jObj.toString().getBytes(StandardCharsets.UTF_8);
-                            DatagramPacket txPkt = new DatagramPacket(txData, jObj.get("msg").toString().length(), multicastGroup, 50000);
+                            DatagramPacket txPkt = new DatagramPacket(txData, jObj.get("msg").toString().length(), multicastAddr, 50000);
                             multicastSock.send(txPkt);
                         }
                     }
@@ -104,8 +116,12 @@ public class UDPMulticast {
                 }
             }
         } catch (IOException ex) {
-            System.exit(1);
+            System.out.println("falha ao entrar no grupo");
         }
+    }
+
+    public UDPMulticast() throws UnknownHostException {
+
     }
 
 }
