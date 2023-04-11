@@ -137,7 +137,7 @@ public class Panel_Chat extends javax.swing.JPanel {
 
     private void bt_sendMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_sendMouseClicked
         if (!txA_type.equals("") || !txA_type.getText().isBlank() || !txA_type.getText().isEmpty()) {
-            UDPMulticast.jObj.put("msg", txA_type.getText());          
+            UDPMulticast.jObj.put("msg", txA_type.getText());
             if (UDPMulticast.jObj.get("msg") != null) {
                 // limpa o campo de digitação 
                 txA_type.setText(null);
@@ -158,19 +158,17 @@ public class Panel_Chat extends javax.swing.JPanel {
         int index = lst_users.getSelectedIndex();
         lstUsers.remove(index);
         Panel_JoinGroup.clientList.remove(index);
+        NetworkInterface networkInterface = null;
+        UDPMulticast.netInterface(networkInterface);
 
         try {
-            NetworkInterface networkInterface = NetworkInterface.getByInetAddress(InetAddress.getByName("192.168.0.5"));
-            if (networkInterface.equals(clientSock.getNetworkInterface())) {
-                // verifica se os dois possuem a mesma getNetworkInterface
-                clientSock.leaveGroup(new InetSocketAddress(InetAddress.getByName(UDPMulticast.multicastAddr), 50000), networkInterface);
-                clientSock.close();
-            }
-        } catch (UnknownHostException ex) {
-            Logger.getLogger(Panel_Chat.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
+            clientSock.leaveGroup(new InetSocketAddress(InetAddress.getByName(UDPMulticast.multicastAddr), 50000), networkInterface);
+            clientSock.close();
+        }  catch (IOException ex) {
             Logger.getLogger(Panel_Chat.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+
     }//GEN-LAST:event_bt_leaveMouseClicked
 
     // mostra os dados recebidos na interface gráfica
@@ -182,7 +180,7 @@ public class Panel_Chat extends javax.swing.JPanel {
                 while (true) {
                     DatagramPacket rxPkt = new DatagramPacket(rxData, rxData.length);
                     clientSock.receive(rxPkt);
-                    
+
                     // criei variáveis pra ficar mais simples de adicionar no objeto client
                     LocalDate date = (LocalDate) UDPMulticast.jObj.get("date_value");
                     LocalTime time = (LocalTime) UDPMulticast.jObj.get("time_value");

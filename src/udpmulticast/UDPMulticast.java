@@ -1,14 +1,18 @@
 package udpmulticast;
 
 import java.io.IOException;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Enumeration;
 import javax.swing.JOptionPane;
 import org.json.simple.JSONObject;
 import static udpmulticast.Panel_JoinGroup.clientList;
@@ -18,16 +22,39 @@ public class UDPMulticast {
     static String multicastAddr = "224.0.0.2";
     static JSONObject jObj = new JSONObject();
 
+    static public NetworkInterface netInterface(NetworkInterface netIF) {
+        Enumeration<NetworkInterface> enumNetIF = null;
+        try {
+            enumNetIF = NetworkInterface.getNetworkInterfaces();
+        } catch (SocketException ex) {
+            System.out.println("Problema em pegar a interface");
+        }
+        while (enumNetIF.hasMoreElements()) {
+            netIF = enumNetIF.nextElement();
+            try {
+                if (netIF.isLoopback()) {
+                    break;
+                }
+            } catch (SocketException ex) {
+                System.out.println("");
+            }
+        }
+        return netIF;
+    }
+
     public static void main(String[] args) throws InterruptedException {
         Window window = new Window();
         window.setVisible(true);
         window.setLocationRelativeTo(null);
+        NetworkInterface netIF = null;
+        netIF = netInterface(netIF);
+        
         try {
             //endereço IPv4 da minha máquina
-            NetworkInterface networkInterface = NetworkInterface.getByInetAddress(InetAddress.getByName("192.168.0.5"));
+
             InetAddress multicastGroup = InetAddress.getByName(multicastAddr);
             MulticastSocket multicastSock = new MulticastSocket(50000);
-            multicastSock.joinGroup(new InetSocketAddress(multicastGroup, 50000), networkInterface);
+            multicastSock.joinGroup(new InetSocketAddress(multicastGroup, 50000), netIF);
 
             Panel_Chat receive = new Panel_Chat(multicastSock);
             receive.t1.start();
