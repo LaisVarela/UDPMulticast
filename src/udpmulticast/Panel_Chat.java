@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
@@ -33,10 +34,16 @@ public class Panel_Chat extends javax.swing.JPanel {
             lstUsers.addElement(item);
         }
         lst_users.setModel(lstUsers);
-        
-        InetAddress multicastAddr = InetAddress.getByName("224.0.0.2");;
+
+        InetAddress multicastAddr = InetAddress.getByName("224.0.0.2");
         InetSocketAddress sockAddr = new InetSocketAddress(multicastAddr, 50000);
-        clientSock.joinGroup(sockAddr, UDPMulticast.netInterface());
+        try {
+            clientSock.joinGroup(sockAddr, UDPMulticast.netInterface());
+        } catch (IOException e) {
+            System.out.println("joinGroup do clientSock");
+            Logger.getLogger(Panel_Chat.class.getName()).log(Level.SEVERE, null, e);
+        }
+
     }
 
     @SuppressWarnings("unchecked")
@@ -53,12 +60,19 @@ public class Panel_Chat extends javax.swing.JPanel {
         txtA_messeges = new javax.swing.JTextArea();
         bt_back = new javax.swing.JButton();
 
+        setBackground(new java.awt.Color(51, 51, 0));
+
+        lst_users.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, java.awt.Color.lightGray, java.awt.Color.lightGray, new java.awt.Color(191, 232, 111), java.awt.Color.lightGray));
         sp_users.setViewportView(lst_users);
 
         txA_type.setColumns(20);
+        txA_type.setFont(new java.awt.Font("Yu Gothic UI", 0, 14)); // NOI18N
         txA_type.setRows(5);
+        txA_type.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, java.awt.Color.lightGray, java.awt.Color.lightGray, new java.awt.Color(191, 232, 111), java.awt.Color.lightGray));
         jScrollPane3.setViewportView(txA_type);
 
+        bt_send.setBackground(new java.awt.Color(255, 255, 255));
+        bt_send.setFont(new java.awt.Font("Yu Gothic UI", 0, 12)); // NOI18N
         bt_send.setText("Send");
         bt_send.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -66,6 +80,8 @@ public class Panel_Chat extends javax.swing.JPanel {
             }
         });
 
+        bt_leave.setBackground(new java.awt.Color(255, 255, 255));
+        bt_leave.setFont(new java.awt.Font("Yu Gothic UI", 0, 12)); // NOI18N
         bt_leave.setText("Leave Group");
         bt_leave.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -75,9 +91,13 @@ public class Panel_Chat extends javax.swing.JPanel {
 
         txtA_messeges.setEnabled(false);
         txtA_messeges.setColumns(20);
+        txtA_messeges.setFont(new java.awt.Font("Yu Gothic UI", 1, 18)); // NOI18N
         txtA_messeges.setRows(5);
+        txtA_messeges.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, java.awt.Color.lightGray, java.awt.Color.lightGray, new java.awt.Color(191, 232, 111), java.awt.Color.lightGray));
         jScrollPane1.setViewportView(txtA_messeges);
 
+        bt_back.setBackground(new java.awt.Color(255, 255, 255));
+        bt_back.setFont(new java.awt.Font("Yu Gothic UI", 0, 12)); // NOI18N
         bt_back.setText("Add +");
         bt_back.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -99,7 +119,7 @@ public class Panel_Chat extends javax.swing.JPanel {
                         .addComponent(bt_back)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 268, Short.MAX_VALUE)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(bt_leave)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -114,8 +134,8 @@ public class Panel_Chat extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 224, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(sp_users, javax.swing.GroupLayout.PREFERRED_SIZE, 322, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -128,7 +148,14 @@ public class Panel_Chat extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void bt_sendMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_sendMouseClicked
-        if (!txA_type.equals("") || !txA_type.getText().isBlank() || !txA_type.getText().isEmpty()) {
+        boolean valida = true;
+        try {
+            txA_type.getText().charAt(0);
+        } catch (Exception e) {
+            valida = false;
+            JOptionPane.showMessageDialog(null, "Precisa digitar alguma coisa!", "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+        if (valida == true) {
             UDPMulticast.jObj.put("msg", txA_type.getText());
             if (UDPMulticast.jObj.get("msg") != null) {
                 // limpa o campo de digitação 
@@ -220,7 +247,7 @@ public class Panel_Chat extends javax.swing.JPanel {
     private javax.swing.JScrollPane jScrollPane3;
     protected static javax.swing.JList<String> lst_users;
     private javax.swing.JScrollPane sp_users;
-    private static javax.swing.JTextArea txA_type;
+    private javax.swing.JTextArea txA_type;
     private static javax.swing.JTextArea txtA_messeges;
     // End of variables declaration//GEN-END:variables
 }

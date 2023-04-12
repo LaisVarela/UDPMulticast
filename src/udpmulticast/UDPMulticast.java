@@ -12,6 +12,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Enumeration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import org.json.simple.JSONObject;
 import static udpmulticast.Panel_JoinGroup.clientList;
@@ -26,7 +28,7 @@ public class UDPMulticast {
         try {
             enumNetIF = NetworkInterface.getNetworkInterfaces();
         } catch (SocketException ex) {
-            System.out.println("Problema em pegar a interface");
+            Logger.getLogger(UDPMulticast.class.getName()).log(Level.SEVERE, null, ex);
         }
         while (enumNetIF.hasMoreElements()) {
             netIF = enumNetIF.nextElement();
@@ -35,7 +37,7 @@ public class UDPMulticast {
                     break;
                 }
             } catch (SocketException ex) {
-                System.out.println("");
+                Logger.getLogger(UDPMulticast.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         return netIF;
@@ -45,15 +47,18 @@ public class UDPMulticast {
         Window window = new Window();
         window.setVisible(true);
         window.setLocationRelativeTo(null);
-        
+
         try {
             InetAddress multicastAddr = InetAddress.getByName("224.0.0.2");
             InetSocketAddress sockAddr = new InetSocketAddress(multicastAddr, 50000);
             MulticastSocket multicastSock = new MulticastSocket(50000);
             multicastSock.joinGroup(sockAddr, netInterface());
             Panel_Chat receive = new Panel_Chat();
-            receive.t1.start();
-
+            try {
+                receive.t1.start();
+            } catch (IllegalThreadStateException ex) {
+                Logger.getLogger(UDPMulticast.class.getName()).log(Level.SEVERE, null, ex);
+            }
             //buffer de comunicação
             byte[] txData = new byte[65507];
 
@@ -65,9 +70,16 @@ public class UDPMulticast {
                 // adicionar/remover elementos no objeto json
                 // msg deve ser o primeiro elemento a ser adicionado
                 // enquanto os outros elementos devem estar null, isso que o if verifica
-                if (!clientList.isEmpty() && jObj.get("date_value") == null
-                        && jObj.get("time_value") == null && jObj.get("name") == null
-                        && jObj.get("msg") != null) {
+                boolean valida = true;
+                try {
+                    clientList.get(0);
+                    jObj.get("date_value");
+                    jObj.get("time_value");
+                    jObj.get("name");
+                } catch (NullPointerException | IndexOutOfBoundsException e) {
+                    valida = false;
+                }
+                if (valida == true && jObj.get("msg") != null) {
 
                     if (Panel_Chat.lst_users.isSelectionEmpty()) {
                         // se nenhum user foi selecionado, não é possível determinar quem está mandando mensagem
@@ -77,19 +89,17 @@ public class UDPMulticast {
                         // a mensagem é descartada
                         Thread.sleep(1000);
                         // thread para repetição da mensagem (senão fica aparecendo o tempo todo)
-                        // pode ser tratado em um while (vou fazer o teste depois)
+                        
                     } else {
                         {
                             jObj.put("date_value", LocalDate.now());
                             jObj.put("time_value", LocalTime.now());
                             jObj.put("name", Panel_Chat.lst_users.getSelectedValue());
                         }
-                        if (jObj.get("msg") != null || !jObj.get("msg").equals("")) {
-                            // uma segunda verificação se a mensagem é diferente de nula, para só então mandar o pacote
-                            txData = jObj.toString().getBytes(StandardCharsets.UTF_8);
-                            DatagramPacket txPkt = new DatagramPacket(txData, jObj.get("msg").toString().length(), multicastAddr, 50000);
-                            multicastSock.send(txPkt);
-                        }
+                        txData = jObj.toString().getBytes(StandardCharsets.UTF_8);
+                        DatagramPacket txPkt = new DatagramPacket(txData, jObj.get("msg").toString().length(), multicastAddr, 50000);
+                        multicastSock.send(txPkt);
+
                     }
                 } else {
                     // a segunda verificação de mensagem nula não entrou, ou seja, a msg é nula ou empty
@@ -99,12 +109,8 @@ public class UDPMulticast {
                 }
             }
         } catch (IOException ex) {
-            System.out.println("falha ao entrar no grupo");
+            Logger.getLogger(UDPMulticast.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-
-    public UDPMulticast() throws UnknownHostException {
-
     }
 
 }
