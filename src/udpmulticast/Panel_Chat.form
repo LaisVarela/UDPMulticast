@@ -37,7 +37,7 @@
                       <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="sp_users" min="-2" pref="116" max="-2" attributes="0"/>
-                          <Component id="bt_back" min="-2" max="-2" attributes="0"/>
+                          <Component id="bt_add" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="1" attributes="0">
@@ -76,7 +76,7 @@
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="bt_send" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="bt_leave" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="bt_back" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="bt_add" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="jSeparator2" min="-2" pref="10" max="-2" attributes="0"/>
@@ -172,7 +172,7 @@
         <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="bt_leaveMouseClicked"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JButton" name="bt_back">
+    <Component class="javax.swing.JButton" name="bt_add">
       <Properties>
         <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="ff" green="ff" red="ff" type="rgb"/>
@@ -183,7 +183,7 @@
         <Property name="text" type="java.lang.String" value="Add +"/>
       </Properties>
       <Events>
-        <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="bt_backMouseClicked"/>
+        <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="bt_addMouseClicked"/>
       </Events>
     </Component>
     <Container class="javax.swing.JScrollPane" name="jScrollPane1">
@@ -193,7 +193,7 @@
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
       <SubComponents>
-        <Component class="javax.swing.JTextArea" name="txtA_messeges">
+        <Component class="javax.swing.JTextArea" name="txtA_messages">
           <Properties>
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
               <Color blue="ff" green="ff" red="ff" type="rgb"/>

@@ -24,9 +24,8 @@ public class Panel_Chat extends javax.swing.JPanel {
     Vector<Client> list = new Vector<>();
     Client client = new Client();
 
-    public Panel_Chat(MulticastSocket clientS) throws IOException { 
+    public Panel_Chat(MulticastSocket clientS) throws IOException {
         initComponents();
-        this.clientSock = new MulticastSocket();
         // passando o nome dos users para JList
         for (Object item : Panel_JoinGroup.clientList) {
             lstUsers.addElement(item);
@@ -45,9 +44,9 @@ public class Panel_Chat extends javax.swing.JPanel {
         txA_type = new javax.swing.JTextArea();
         bt_send = new javax.swing.JButton();
         bt_leave = new javax.swing.JButton();
-        bt_back = new javax.swing.JButton();
+        bt_add = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        txtA_messeges = new javax.swing.JTextArea();
+        txtA_messages = new javax.swing.JTextArea();
         jSeparator1 = new javax.swing.JSeparator();
         jSeparator2 = new javax.swing.JSeparator();
 
@@ -82,23 +81,23 @@ public class Panel_Chat extends javax.swing.JPanel {
             }
         });
 
-        bt_back.setBackground(new java.awt.Color(255, 255, 255));
-        bt_back.setFont(new java.awt.Font("Yu Gothic UI", 1, 12)); // NOI18N
-        bt_back.setText("Add +");
-        bt_back.addMouseListener(new java.awt.event.MouseAdapter() {
+        bt_add.setBackground(new java.awt.Color(255, 255, 255));
+        bt_add.setFont(new java.awt.Font("Yu Gothic UI", 1, 12)); // NOI18N
+        bt_add.setText("Add +");
+        bt_add.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                bt_backMouseClicked(evt);
+                bt_addMouseClicked(evt);
             }
         });
 
-        txtA_messeges.setBackground(new java.awt.Color(255, 255, 255));
-        txtA_messeges.setColumns(20);
-        txtA_messeges.setFont(new java.awt.Font("Yu Gothic UI", 1, 14)); // NOI18N
-        txtA_messeges.setRows(5);
-        txtA_messeges.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, java.awt.Color.lightGray, java.awt.Color.lightGray, java.awt.Color.white, java.awt.Color.lightGray));
-        txtA_messeges.setDisabledTextColor(new java.awt.Color(0, 0, 0));
-        txtA_messeges.setEnabled(false);
-        jScrollPane1.setViewportView(txtA_messeges);
+        txtA_messages.setBackground(new java.awt.Color(255, 255, 255));
+        txtA_messages.setColumns(20);
+        txtA_messages.setFont(new java.awt.Font("Yu Gothic UI", 1, 14)); // NOI18N
+        txtA_messages.setRows(5);
+        txtA_messages.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, java.awt.Color.lightGray, java.awt.Color.lightGray, java.awt.Color.white, java.awt.Color.lightGray));
+        txtA_messages.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+        txtA_messages.setEnabled(false);
+        jScrollPane1.setViewportView(txtA_messages);
 
         jSeparator1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, java.awt.Color.black, java.awt.Color.black, new java.awt.Color(153, 153, 153), new java.awt.Color(153, 153, 153)));
 
@@ -119,7 +118,7 @@ public class Panel_Chat extends javax.swing.JPanel {
                         .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(sp_users, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(bt_back))
+                            .addComponent(bt_add))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(layout.createSequentialGroup()
@@ -148,7 +147,7 @@ public class Panel_Chat extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(bt_send)
                     .addComponent(bt_leave)
-                    .addComponent(bt_back))
+                    .addComponent(bt_add))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -163,25 +162,15 @@ public class Panel_Chat extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_bt_sendMouseClicked
 
-    private void bt_backMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_backMouseClicked
+    private void bt_addMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_addMouseClicked
         Window.join = new Panel_JoinGroup();
         JFrame window = (JFrame) SwingUtilities.getWindowAncestor(this);
         window.remove(Window.chat);
         window.add(Window.join);
         window.pack();
-    }//GEN-LAST:event_bt_backMouseClicked
+    }//GEN-LAST:event_bt_addMouseClicked
 
     private void bt_leaveMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_leaveMouseClicked
-
-        InetAddress multicastAddr;
-        InetSocketAddress sockAddr = null;
-        try {
-            multicastAddr = InetAddress.getByName("224.0.0.2");
-            sockAddr = new InetSocketAddress(multicastAddr, 50000);
-        } catch (UnknownHostException ex) {
-            Logger.getLogger(Panel_Chat.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
         boolean validates = true;
         try {
             boolean selection = lst_users.isSelectionEmpty();
@@ -190,7 +179,7 @@ public class Panel_Chat extends javax.swing.JPanel {
             }
         } catch (EmptyException e) {
             validates = false;
-            JOptionPane.showMessageDialog(null, "Select a user.", "Messege", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Select a user.", "Message", JOptionPane.WARNING_MESSAGE);
         }
         if (validates == true) {
             if (Panel_JoinGroup.clientList.size() == 1) {
@@ -199,7 +188,7 @@ public class Panel_Chat extends javax.swing.JPanel {
                 switch (option) {
                     case 0 -> {
                         try {
-                            clientSock.leaveGroup(sockAddr, UDPMulticast.netInterface());
+                            clientSock.leaveGroup(UDPMulticast.sockAddr, UDPMulticast.netInterface());
                             clientSock.close();
                         } catch (IOException ex) {
                             Logger.getLogger(Panel_Chat.class.getName()).log(Level.SEVERE, null, ex);
@@ -232,7 +221,7 @@ public class Panel_Chat extends javax.swing.JPanel {
 
                     client = new Client(date, time, name, msg);
                     list.add(client);
-                    txtA_messeges.setText(list.toString().replace(",", "").replace("[", "").replace("]", ""));
+                    txtA_messages.setText(list.toString().replace(",", "").replace("[", "").replace("]", ""));
 
                 }
             } catch (IOException e) {
@@ -242,7 +231,7 @@ public class Panel_Chat extends javax.swing.JPanel {
     });
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton bt_back;
+    private javax.swing.JButton bt_add;
     private javax.swing.JButton bt_leave;
     private javax.swing.JButton bt_send;
     private javax.swing.JScrollPane jScrollPane1;
@@ -252,6 +241,6 @@ public class Panel_Chat extends javax.swing.JPanel {
     protected static javax.swing.JList<String> lst_users;
     private javax.swing.JScrollPane sp_users;
     private static javax.swing.JTextArea txA_type;
-    private static javax.swing.JTextArea txtA_messeges;
+    private static javax.swing.JTextArea txtA_messages;
     // End of variables declaration//GEN-END:variables
 }

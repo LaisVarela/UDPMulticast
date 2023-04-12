@@ -21,6 +21,7 @@ public class UDPMulticast {
 
     static JSONObject jObj = new JSONObject();
     static MulticastSocket x;
+    static InetSocketAddress sockAddr;
     static public NetworkInterface netInterface() {
         NetworkInterface netIF = null;
         Enumeration<NetworkInterface> enumNetIF = null;
@@ -49,10 +50,8 @@ public class UDPMulticast {
 
         try {
             InetAddress multicastAddr = InetAddress.getByName("224.0.0.2");
-            InetSocketAddress sockAddr = new InetSocketAddress(multicastAddr, 50000);
-            //MulticastSocket multicastSock = new MulticastSocket(50000);
+            sockAddr = new InetSocketAddress(multicastAddr, 50000);
             x = new MulticastSocket(50000);
-            //multicastSock.joinGroup(sockAddr, netInterface());
             x.joinGroup(sockAddr, netInterface());
 
             //Panel_Chat receive = new Panel_Chat(multicastSock);
