@@ -73,10 +73,10 @@ public class UDPMulticast {
                 boolean valida = true;
                 try {
                     clientList.get(0);
-                    jObj.get("date_value");
-                    jObj.get("time_value");
-                    jObj.get("name");
-                } catch (NullPointerException | IndexOutOfBoundsException e) {
+                    if (jObj.size() == 0) {
+                        throw new JObjEmptyException();
+                    }
+                } catch (JObjEmptyException | IndexOutOfBoundsException e) {
                     valida = false;
                 }
                 if (valida == true && jObj.get("msg") != null) {
@@ -89,7 +89,7 @@ public class UDPMulticast {
                         // a mensagem é descartada
                         Thread.sleep(1000);
                         // thread para repetição da mensagem (senão fica aparecendo o tempo todo)
-                        
+
                     } else {
                         {
                             jObj.put("date_value", LocalDate.now());
