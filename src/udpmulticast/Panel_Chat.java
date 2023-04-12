@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
+import java.net.UnknownHostException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Vector;
@@ -13,6 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 public class Panel_Chat extends javax.swing.JPanel {
@@ -22,28 +24,7 @@ public class Panel_Chat extends javax.swing.JPanel {
     Vector<Client> list = new Vector<>();
     Client client = new Client();
 
-    // dois construtores são necessários devido a sobrecarga necessária
-    public Panel_Chat() throws IOException {
-        initComponents();
-        this.clientSock = new MulticastSocket();
-        // passando o nome dos users para JList
-        for (Object item : Panel_JoinGroup.clientList) {
-            lstUsers.addElement(item);
-        }
-        lst_users.setModel(lstUsers);
-
-        InetAddress multicastAddr = InetAddress.getByName("224.0.0.2");
-        InetSocketAddress sockAddr = new InetSocketAddress(multicastAddr, 50000);
-        try {
-            clientSock.joinGroup(sockAddr, UDPMulticast.netInterface());
-        } catch (IOException e) {
-            System.out.println("joinGroup do clientSock");
-            Logger.getLogger(Panel_Chat.class.getName()).log(Level.SEVERE, null, e);
-        }
-
-    }
-
-    public Panel_Chat(MulticastSocket clientS) throws IOException {
+    public Panel_Chat(MulticastSocket clientS) throws IOException { 
         initComponents();
         this.clientSock = new MulticastSocket();
         // passando o nome dos users para JList
@@ -183,7 +164,6 @@ public class Panel_Chat extends javax.swing.JPanel {
     }//GEN-LAST:event_bt_sendMouseClicked
 
     private void bt_backMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_backMouseClicked
-
         Window.join = new Panel_JoinGroup();
         JFrame window = (JFrame) SwingUtilities.getWindowAncestor(this);
         window.remove(Window.chat);
@@ -192,22 +172,46 @@ public class Panel_Chat extends javax.swing.JPanel {
     }//GEN-LAST:event_bt_backMouseClicked
 
     private void bt_leaveMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_leaveMouseClicked
-        //remove from Jlist
-        int index = lst_users.getSelectedIndex();
-        lstUsers.remove(index);
-        Panel_JoinGroup.clientList.remove(index);
 
+        InetAddress multicastAddr;
+        InetSocketAddress sockAddr = null;
         try {
-            InetAddress multicastAddr = InetAddress.getByName("224.0.0.2");
-            InetSocketAddress sockAddr = new InetSocketAddress(multicastAddr, 50000);
-            clientSock.leaveGroup(sockAddr, UDPMulticast.netInterface());
-            clientSock.close();
-        } catch (IOException ex) {
-            System.out.println("Problema em sair do grupo");
+            multicastAddr = InetAddress.getByName("224.0.0.2");
+            sockAddr = new InetSocketAddress(multicastAddr, 50000);
+        } catch (UnknownHostException ex) {
             Logger.getLogger(Panel_Chat.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-
+        boolean validates = true;
+        try {
+            boolean selection = lst_users.isSelectionEmpty();
+            if (selection == true) {
+                throw new EmptyException();
+            }
+        } catch (EmptyException e) {
+            validates = false;
+            JOptionPane.showMessageDialog(null, "Select a user.", "Messege", JOptionPane.WARNING_MESSAGE);
+        }
+        if (validates == true) {
+            if (Panel_JoinGroup.clientList.size() == 1) {
+                Object[] options = {"Leave", "Cancel"};
+                int option = JOptionPane.showOptionDialog(null, "Are you sure? The application will be closed.", "Attention", JOptionPane.YES_NO_OPTION, options.length, null, options, JOptionPane.QUESTION_MESSAGE);
+                switch (option) {
+                    case 0 -> {
+                        try {
+                            clientSock.leaveGroup(sockAddr, UDPMulticast.netInterface());
+                            clientSock.close();
+                        } catch (IOException ex) {
+                            Logger.getLogger(Panel_Chat.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                }
+            } else {
+                int index = lst_users.getSelectedIndex();
+                lstUsers.remove(index);
+                Panel_JoinGroup.clientList.remove(index);
+            }
+        }
     }//GEN-LAST:event_bt_leaveMouseClicked
 
     // mostra os dados recebidos na interface gráfica
@@ -232,8 +236,7 @@ public class Panel_Chat extends javax.swing.JPanel {
 
                 }
             } catch (IOException e) {
-                System.err.println("\n\tMessege error: " + e.getMessage());
-                System.exit(1);
+                System.exit(0);
             }
         }
     });

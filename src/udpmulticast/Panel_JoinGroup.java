@@ -129,7 +129,7 @@ public class Panel_JoinGroup extends javax.swing.JPanel {
         if (!txt_username.getText().equals("")) {
             clientList.add(txt_username.getText());
             try {
-                Window.chat = new Panel_Chat();
+                Window.chat = new Panel_Chat(UDPMulticast.x);
             } catch (IOException ex) {
                 Logger.getLogger(Panel_JoinGroup.class.getName()).log(Level.SEVERE, null, ex);
             }

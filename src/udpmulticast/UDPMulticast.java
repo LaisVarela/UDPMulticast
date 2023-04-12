@@ -20,7 +20,7 @@ import static udpmulticast.Panel_JoinGroup.clientList;
 public class UDPMulticast {
 
     static JSONObject jObj = new JSONObject();
-
+    static MulticastSocket x;
     static public NetworkInterface netInterface() {
         NetworkInterface netIF = null;
         Enumeration<NetworkInterface> enumNetIF = null;
@@ -50,10 +50,13 @@ public class UDPMulticast {
         try {
             InetAddress multicastAddr = InetAddress.getByName("224.0.0.2");
             InetSocketAddress sockAddr = new InetSocketAddress(multicastAddr, 50000);
-            MulticastSocket multicastSock = new MulticastSocket(50000);
-            multicastSock.joinGroup(sockAddr, netInterface());
+            //MulticastSocket multicastSock = new MulticastSocket(50000);
+            x = new MulticastSocket(50000);
+            //multicastSock.joinGroup(sockAddr, netInterface());
+            x.joinGroup(sockAddr, netInterface());
 
-            Panel_Chat receive = new Panel_Chat(multicastSock);
+            //Panel_Chat receive = new Panel_Chat(multicastSock);
+            Panel_Chat receive = new Panel_Chat(x);
             try {
                 receive.t1.start();
             } catch (IllegalThreadStateException ex) {
@@ -74,9 +77,9 @@ public class UDPMulticast {
                 try {
                     clientList.get(0);
                     if (jObj.isEmpty()) {
-                        throw new JObjEmptyException();
+                        throw new EmptyException();
                     }
-                } catch (JObjEmptyException | IndexOutOfBoundsException e) {
+                } catch (EmptyException | IndexOutOfBoundsException e) {
                     valida = false;
                 }
                 if (valida == true && jObj.get("msg") != null) {
@@ -97,7 +100,7 @@ public class UDPMulticast {
                         }
                         txData = jObj.toString().getBytes(StandardCharsets.UTF_8);
                         DatagramPacket txPkt = new DatagramPacket(txData, jObj.get("msg").toString().length(), multicastAddr, 50000);
-                        multicastSock.send(txPkt);
+                        x.send(txPkt);
                     }
                 }
                 if (jObj.size() == 4) {
