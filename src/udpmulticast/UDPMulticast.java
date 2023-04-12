@@ -52,6 +52,7 @@ public class UDPMulticast {
             InetSocketAddress sockAddr = new InetSocketAddress(multicastAddr, 50000);
             MulticastSocket multicastSock = new MulticastSocket(50000);
             multicastSock.joinGroup(sockAddr, netInterface());
+
             Panel_Chat receive = new Panel_Chat(multicastSock);
             try {
                 receive.t1.start();
@@ -72,14 +73,13 @@ public class UDPMulticast {
                 boolean valida = true;
                 try {
                     clientList.get(0);
-                    if (jObj.size() == 0) {
+                    if (jObj.isEmpty()) {
                         throw new JObjEmptyException();
                     }
                 } catch (JObjEmptyException | IndexOutOfBoundsException e) {
                     valida = false;
                 }
                 if (valida == true && jObj.get("msg") != null) {
-
                     if (Panel_Chat.lst_users.isSelectionEmpty()) {
                         // se nenhum user foi selecionado, não é possível determinar quem está mandando mensagem
                         JOptionPane.showMessageDialog(null, "Select a user", "Error", JOptionPane.ERROR_MESSAGE);
@@ -98,10 +98,11 @@ public class UDPMulticast {
                         txData = jObj.toString().getBytes(StandardCharsets.UTF_8);
                         DatagramPacket txPkt = new DatagramPacket(txData, jObj.get("msg").toString().length(), multicastAddr, 50000);
                         multicastSock.send(txPkt);
-                        if (!jObj.isEmpty()) {
-                            jObj.clear();
-                        }
                     }
+                }
+                if (jObj.size() == 4) {
+                    Thread.sleep(500);
+                    jObj.clear();
                 }
             }
         } catch (IOException ex) {
