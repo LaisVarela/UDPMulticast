@@ -12,8 +12,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Enumeration;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import org.json.simple.JSONObject;
 import static udpmulticast.Panel_JoinGroup.clientList;
@@ -48,27 +46,12 @@ public class UDPMulticast {
         window.setVisible(true);
         window.setLocationRelativeTo(null);
         
-        /*if (args.length != 1) {
-            System.err.println("Invalid arguments...\n\tUses: UDPClient <server_IP> <server_port>");
-            System.exit(1);
-        } else {
-            try {
-                // pega o primeiro argumento com o IP do servidor
-                multicastAddr = InetAddress.getByName(args[0]);
-                // pega o segundo argumento com a porta do servidor
-                
-            } catch (UnknownHostException ex) {
-                Logger.getLogger(UDPMulticast.class.getName()).log(Level.SEVERE, null, ex);
-            }
-
-        }
-        System.out.println("Starting UPDClient with " + multicastAddr + ":");*/
         try {
             InetAddress multicastAddr = InetAddress.getByName("224.0.0.2");
             InetSocketAddress sockAddr = new InetSocketAddress(multicastAddr, 50000);
             MulticastSocket multicastSock = new MulticastSocket(50000);
             multicastSock.joinGroup(sockAddr, netInterface());
-            Panel_Chat receive = new Panel_Chat(multicastSock);
+            Panel_Chat receive = new Panel_Chat();
             receive.t1.start();
 
             //buffer de comunicação

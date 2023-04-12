@@ -23,7 +23,6 @@ public class Panel_Chat extends javax.swing.JPanel {
     // aula de 27/04 - vector (list para threads)
     LinkedList<Client> list = new LinkedList<>();
     Client client = new Client();
-    
 
     // dois construtores são necessários devido a sobrecarga necessária
     public Panel_Chat() throws IOException {
@@ -34,16 +33,10 @@ public class Panel_Chat extends javax.swing.JPanel {
             lstUsers.addElement(item);
         }
         lst_users.setModel(lstUsers);
-    }
-
-    public Panel_Chat(MulticastSocket clientSocket) throws IOException {
-        this.clientSock = new MulticastSocket();
-        initComponents();
-        for (Object item : Panel_JoinGroup.clientList) {
-            lstUsers.addElement(item);
-        }
-        lst_users.setModel(lstUsers);
-        this.clientSock = clientSocket;
+        
+        InetAddress multicastAddr = InetAddress.getByName("224.0.0.2");;
+        InetSocketAddress sockAddr = new InetSocketAddress(multicastAddr, 50000);
+        clientSock.joinGroup(sockAddr, UDPMulticast.netInterface());
     }
 
     @SuppressWarnings("unchecked")
@@ -142,7 +135,6 @@ public class Panel_Chat extends javax.swing.JPanel {
                 txA_type.setText(null);
             }
         }
-        System.out.println(clientSock.getLocalSocketAddress());
     }//GEN-LAST:event_bt_sendMouseClicked
 
     private void bt_backMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_backMouseClicked
@@ -158,12 +150,12 @@ public class Panel_Chat extends javax.swing.JPanel {
         int index = lst_users.getSelectedIndex();
         lstUsers.remove(index);
         Panel_JoinGroup.clientList.remove(index);
-        
+
         try {
             System.out.println(clientSock.getNetworkInterface());
             InetAddress multicastAddr = InetAddress.getByName("224.0.0.2");;
             InetSocketAddress sockAddr = new InetSocketAddress(multicastAddr, 50000);
-            clientSock.leaveGroup(sockAddr, clientSock.getNetworkInterface());
+            clientSock.leaveGroup(sockAddr, UDPMulticast.netInterface());
             clientSock.close();
         } catch (IOException ex) {
             System.out.println("Problema em sair do grupo");
