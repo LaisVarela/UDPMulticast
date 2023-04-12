@@ -22,6 +22,7 @@ public class UDPMulticast {
     static JSONObject jObj = new JSONObject();
     static MulticastSocket x;
     static InetSocketAddress sockAddr;
+    
     static public NetworkInterface netInterface() {
         NetworkInterface netIF = null;
         Enumeration<NetworkInterface> enumNetIF = null;
