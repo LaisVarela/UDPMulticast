@@ -46,6 +46,26 @@ public class Panel_Chat extends javax.swing.JPanel {
 
     }
 
+    public Panel_Chat(MulticastSocket clientS) throws IOException {
+        this.clientSock = new MulticastSocket();
+        initComponents();
+        // passando o nome dos users para JList
+        for (Object item : Panel_JoinGroup.clientList) {
+            lstUsers.addElement(item);
+        }
+        lst_users.setModel(lstUsers);
+        clientSock = clientS;
+        /*InetAddress multicastAddr = InetAddress.getByName("224.0.0.2");
+        InetSocketAddress sockAddr = new InetSocketAddress(multicastAddr, 50000);
+        try {
+            clientSock.joinGroup(sockAddr, UDPMulticast.netInterface());
+        } catch (IOException e) {
+            System.out.println("joinGroup do clientSock");
+            Logger.getLogger(Panel_Chat.class.getName()).log(Level.SEVERE, null, e);
+        }*/
+
+    }
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -148,19 +168,10 @@ public class Panel_Chat extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void bt_sendMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_sendMouseClicked
-        boolean valida = true;
-        try {
-            txA_type.getText().charAt(0);
-        } catch (Exception e) {
-            valida = false;
-            JOptionPane.showMessageDialog(null, "Precisa digitar alguma coisa!", "Erro", JOptionPane.ERROR_MESSAGE);
-        }
-        if (valida == true) {
-            UDPMulticast.jObj.put("msg", txA_type.getText());
-            if (UDPMulticast.jObj.get("msg") != null) {
-                // limpa o campo de digitação 
-                txA_type.setText(null);
-            }
+        UDPMulticast.jObj.put("msg", txA_type.getText());
+        if (UDPMulticast.jObj.get("msg") != null) {
+            // limpa o campo de digitação 
+            txA_type.setText(null);
         }
     }//GEN-LAST:event_bt_sendMouseClicked
 

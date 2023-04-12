@@ -7,7 +7,6 @@ import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -53,7 +52,7 @@ public class UDPMulticast {
             InetSocketAddress sockAddr = new InetSocketAddress(multicastAddr, 50000);
             MulticastSocket multicastSock = new MulticastSocket(50000);
             multicastSock.joinGroup(sockAddr, netInterface());
-            Panel_Chat receive = new Panel_Chat();
+            Panel_Chat receive = new Panel_Chat(multicastSock);
             try {
                 receive.t1.start();
             } catch (IllegalThreadStateException ex) {
@@ -99,13 +98,10 @@ public class UDPMulticast {
                         txData = jObj.toString().getBytes(StandardCharsets.UTF_8);
                         DatagramPacket txPkt = new DatagramPacket(txData, jObj.get("msg").toString().length(), multicastAddr, 50000);
                         multicastSock.send(txPkt);
-
+                        if (!jObj.isEmpty()) {
+                            jObj.clear();
+                        }
                     }
-                } else {
-                    // a segunda verificação de mensagem nula não entrou, ou seja, a msg é nula ou empty
-                    // porém os elementos de data_value, time_value e name estão preenchidos
-                    // se não há mensagem, não há o que enviar, por isso o obj json precisa ser limpo
-                    jObj.clear();
                 }
             }
         } catch (IOException ex) {
