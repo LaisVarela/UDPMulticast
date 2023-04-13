@@ -152,8 +152,8 @@ public class Panel_Chat extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void bt_sendMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_sendMouseClicked
-        UDPMulticast.jObj.put("msg", txA_type.getText());
-        if (UDPMulticast.jObj.get("msg") != null) {
+        UDPMulticast.jObj.put("message_value", txA_type.getText());
+        if (UDPMulticast.jObj.get("message_value") != null) {
             // limpa o campo de digitação 
             txA_type.setText(null);
         }
@@ -213,8 +213,8 @@ public class Panel_Chat extends javax.swing.JPanel {
                     // criei variáveis pra ficar mais simples de adicionar no objeto client
                     LocalDate date = (LocalDate) UDPMulticast.jObj.get("date_value");
                     LocalTime time = (LocalTime) UDPMulticast.jObj.get("time_value");
-                    String name = (String) UDPMulticast.jObj.get("name");
-                    String msg = (String) UDPMulticast.jObj.get("msg");
+                    String name = (String) UDPMulticast.jObj.get("username_value");
+                    String msg = (String) UDPMulticast.jObj.get("message_value");
 
                     client = new Client(date, time, name, msg);
                     list.add(client);

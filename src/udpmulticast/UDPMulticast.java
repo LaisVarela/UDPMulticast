@@ -82,7 +82,7 @@ public class UDPMulticast {
                 } catch (EmptyException | IndexOutOfBoundsException e) {
                     valida = false;
                 }
-                if (valida == true && jObj.get("msg") != null) {
+                if (valida == true && jObj.get("message_value") != null) {
                     if (Panel_Chat.lst_users.isSelectionEmpty()) {
                         // se nenhum user foi selecionado, não é possível determinar quem está mandando mensagem
                         JOptionPane.showMessageDialog(null, "Select a user", "Error", JOptionPane.ERROR_MESSAGE);
@@ -96,10 +96,10 @@ public class UDPMulticast {
                         {
                             jObj.put("date_value", LocalDate.now());
                             jObj.put("time_value", LocalTime.now());
-                            jObj.put("name", Panel_Chat.lst_users.getSelectedValue());
+                            jObj.put("username_value", Panel_Chat.lst_users.getSelectedValue());
                         }
                         txData = jObj.toString().getBytes(StandardCharsets.UTF_8);
-                        DatagramPacket txPkt = new DatagramPacket(txData, jObj.get("msg").toString().length(), multicastAddr, 50000);
+                        DatagramPacket txPkt = new DatagramPacket(txData, jObj.get("message_value").toString().length(), multicastAddr, 50000);
                         x.send(txPkt);
                     }
                 }
