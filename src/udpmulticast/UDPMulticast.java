@@ -7,23 +7,28 @@ import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JOptionPane;
-import org.json.simple.JSONObject;
-import static udpmulticast.Panel_JoinGroup.clientList;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-public class UDPMulticast {
+public final class UDPMulticast extends Thread {
 
-    static JSONObject jObj = new JSONObject();
-    static MulticastSocket x;
-    static InetSocketAddress sockAddr;
-    
-    static public NetworkInterface netInterface() {
+    final InetAddress multicastAddr = InetAddress.getByName("224.0.0.2");
+    final InetSocketAddress sockAddr = new InetSocketAddress(multicastAddr, 50000);
+    final MulticastSocket multicastSock = new MulticastSocket(50000);
+
+    public UDPMulticast() throws UnknownHostException, IOException, InterruptedException, JSONException {
+        multicastSock.joinGroup(sockAddr, netInterface());
+        this.start();
+    }
+
+    public NetworkInterface netInterface() {
         NetworkInterface netIF = null;
         Enumeration<NetworkInterface> enumNetIF = null;
         try {
@@ -44,71 +49,29 @@ public class UDPMulticast {
         return netIF;
     }
 
-    public static void main(String[] args) throws InterruptedException {
-        Window window = new Window();
-        window.setVisible(true);
-        window.setLocationRelativeTo(null);
-
+    @Override
+    public void run() {
+        JSONObject jObj;
         try {
-            InetAddress multicastAddr = InetAddress.getByName("224.0.0.2");
-            sockAddr = new InetSocketAddress(multicastAddr, 50000);
-            x = new MulticastSocket(50000);
-            x.joinGroup(sockAddr, netInterface());
-
-            //Panel_Chat receive = new Panel_Chat(multicastSock);
-            Panel_Chat receive = new Panel_Chat(x);
-            try {
-                receive.t1.start();
-            } catch (IllegalThreadStateException ex) {
-                Logger.getLogger(UDPMulticast.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            Panel_Chat chat = new Panel_Chat(multicastSock, sockAddr, netInterface());
             //buffer de comunicação
             byte[] txData = new byte[65507];
-
+            byte[] rxData = new byte[65507];
             while (true) {
-                // thread para aparecer as mensagens no terminal (verificação do terminal)
-                // na interface gráfica também não aparece a msg caso não tenha essa thread
-                Thread.sleep(500);
-
-                // adicionar/remover elementos no objeto json
-                // msg deve ser o primeiro elemento a ser adicionado
-                // enquanto os outros elementos devem estar null, isso que o if verifica
-                boolean valida = true;
-                try {
-                    clientList.get(0);
-                    if (jObj.isEmpty()) {
-                        throw new EmptyException();
-                    }
-                } catch (EmptyException | IndexOutOfBoundsException e) {
-                    valida = false;
-                }
-                if (valida == true && jObj.get("message_value") != null) {
-                    if (Panel_Chat.lst_users.isSelectionEmpty()) {
-                        // se nenhum user foi selecionado, não é possível determinar quem está mandando mensagem
-                        JOptionPane.showMessageDialog(null, "Select a user", "Error", JOptionPane.ERROR_MESSAGE);
-                        jObj.clear();
-                        // limpa o objeto json, já que o usuário não foi selecionado
-                        // a mensagem é descartada
-                        Thread.sleep(1000);
-                        // thread para repetição da mensagem (senão fica aparecendo o tempo todo)
-
-                    } else {
-                        {
-                            jObj.put("date_value", LocalDate.now());
-                            jObj.put("time_value", LocalTime.now());
-                            jObj.put("username_value", Panel_Chat.lst_users.getSelectedValue());
-                        }
-                        txData = jObj.toString().getBytes(StandardCharsets.UTF_8);
-                        DatagramPacket txPkt = new DatagramPacket(txData, jObj.get("message_value").toString().length(), multicastAddr, 50000);
-                        x.send(txPkt);
-                    }
-                }
-                if (jObj.size() == 4) {
-                    Thread.sleep(500);
-                    jObj.clear();
-                }
+                DatagramPacket rxPkt = new DatagramPacket(rxData, rxData.length);
+                multicastSock.receive(rxPkt);
+                String msg = new String(rxPkt.getData(), 0, rxPkt.getLength());
+                System.out.println("SERVIDOR\n\t" + msg);
+                jObj = new JSONObject(msg);
+                jObj.put("date_value", LocalDate.now());
+                jObj.put("time_value", LocalTime.now());
+                txData = jObj.toString().getBytes(StandardCharsets.UTF_8);
+                System.out.println("Servidor\n\t" + jObj.toString());
+                DatagramPacket txPkt = new DatagramPacket(txData, jObj.toString().length(), multicastAddr, 50000);
+                multicastSock.send(txPkt);
+                chat.run();
             }
-        } catch (IOException ex) {
+        } catch (IOException | JSONException | InterruptedException ex) {
             Logger.getLogger(UDPMulticast.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
