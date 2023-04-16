@@ -11,6 +11,7 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,7 +25,6 @@ public final class UDPMulticast extends Thread {
     final MulticastSocket multicastSock = new MulticastSocket(50000);
 
     public UDPMulticast() throws UnknownHostException, IOException, InterruptedException, JSONException {
-        multicastSock.joinGroup(sockAddr, netInterface());
         this.start();
     }
 
@@ -63,8 +63,8 @@ public final class UDPMulticast extends Thread {
                 String msg = new String(rxPkt.getData(), 0, rxPkt.getLength());
                 System.out.println("SERVIDOR\n\t" + msg);
                 jObj = new JSONObject(msg);
-                jObj.put("date_value", LocalDate.now());
-                jObj.put("time_value", LocalTime.now());
+                jObj.put("date_value", LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+                jObj.put("time_value", LocalTime.now().format(DateTimeFormatter.ofPattern("hh:mm:ss")));
                 txData = jObj.toString().getBytes(StandardCharsets.UTF_8);
                 System.out.println("Servidor\n\t" + jObj.toString());
                 DatagramPacket txPkt = new DatagramPacket(txData, jObj.toString().length(), multicastAddr, 50000);

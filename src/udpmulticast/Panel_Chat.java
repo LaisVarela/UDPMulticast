@@ -2,14 +2,11 @@ package udpmulticast;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
-import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -22,6 +19,7 @@ public class Panel_Chat extends javax.swing.JFrame implements Runnable {
     MulticastSocket clientSock;
     NetworkInterface netIF;
     JSONObject jObj = new JSONObject();
+    String user;
 
     public Panel_Chat(MulticastSocket clientS, InetSocketAddress sockAddr, NetworkInterface ni) throws IOException, InterruptedException, JSONException {
         initComponents();
@@ -156,7 +154,7 @@ public class Panel_Chat extends javax.swing.JFrame implements Runnable {
 
         txtA_messages.setBackground(new java.awt.Color(255, 255, 255));
         txtA_messages.setColumns(20);
-        txtA_messages.setFont(new java.awt.Font("Yu Gothic UI", 1, 14)); // NOI18N
+        txtA_messages.setFont(new java.awt.Font("Yu Gothic UI", 1, 12)); // NOI18N
         txtA_messages.setRows(5);
         txtA_messages.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, java.awt.Color.lightGray, java.awt.Color.lightGray, java.awt.Color.white, java.awt.Color.lightGray));
         txtA_messages.setDisabledTextColor(new java.awt.Color(0, 0, 0));
@@ -264,10 +262,11 @@ public class Panel_Chat extends javax.swing.JFrame implements Runnable {
             pn_chat.setVisible(true);
             pn_join.setVisible(false);
             this.pack();
+            user = txt_username.getText();
+            txt_username.setText(null);
             try {
-                jObj.put("username_value", txt_username.getText());
-                txt_username.setText(null);
-            } catch (JSONException ex) {
+                clientSock.joinGroup(sockAddr, netIF);
+            } catch (IOException ex) {
                 Logger.getLogger(Panel_Chat.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
@@ -285,6 +284,7 @@ public class Panel_Chat extends javax.swing.JFrame implements Runnable {
         switch (option) {
             case 0 -> {
                 try {
+                    txtA_messages.setText(null);
                     clientSock.leaveGroup(sockAddr, netIF);
                     pn_chat.setVisible(false);
                     pn_join.setVisible(true);
@@ -300,6 +300,7 @@ public class Panel_Chat extends javax.swing.JFrame implements Runnable {
         byte[] txData = new byte[65507];
         try {
             if (!txA_type.getText().isBlank()) {
+                jObj.put("username_value", user);
                 jObj.put("message_value", txA_type.getText());
                 if (jObj.get("message_value") != null) {
                     // limpa o campo de digitação
@@ -321,14 +322,16 @@ public class Panel_Chat extends javax.swing.JFrame implements Runnable {
     @Override
     public void run() {
         byte[] rxData = new byte[65507];
+        String aux = "";
         try {
             while (true) {
                 DatagramPacket rxPkt = new DatagramPacket(rxData, rxData.length);
                 clientSock.receive(rxPkt);
                 String msgRx = new String(rxPkt.getData(), 0, rxPkt.getLength());
                 jObj = new JSONObject(msgRx);
-                System.out.println("\nCliente\n\t" + jObj.toString());
-                if (!jObj.isNull("date_value")) {
+                if (!jObj.toString().equals(aux)) {
+                    aux = jObj.toString();
+                    System.out.println("\nCliente\n\t" + jObj.toString());
                     txtA_messages.setText(txtA_messages.getText() + "\n" + jObj.get("username_value") + " [" + jObj.get("date_value") + " "
                             + jObj.get("time_value") + "]\n> " + jObj.get("message_value"));
                 }
